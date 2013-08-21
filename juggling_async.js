@@ -31,21 +31,33 @@
 
  */
 var http = require('http');
+var cnt = 3;
+var content = [];
 
-var content="";
-http.get('www.google.com', function(res){
-	res.setEncoding('utf-8');
-	res.on('error', console.error);
+var makeRequest = function(host, i) {
+	http.get(host, function(res) {
 
-	res.on('data', function(chunk){
-		content+=chunk;
+		res.setEncoding('utf-8');
+		var body="";
+		res.on('error', console.error);
+
+		res.on('data', function(chunk) {
+			body+= chunk;
+		});
+
+		res.on('end', function() {
+			content[i]=body;
+			cnt--;
+			if(cnt==0){
+				for(var c in content){
+					console.log(content[c]);
+				}
+			}
+
+		});
 	});
+}
 
-	res.on('end', function(){
-		console.log(content.length);
-		console.log(content);
-
-	});
-
-
-});
+for (var i = 0; i < 3; i++) {
+	makeRequest(process.argv[i+2], i);
+}
